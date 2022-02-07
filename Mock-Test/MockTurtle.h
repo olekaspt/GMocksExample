@@ -6,7 +6,7 @@
 class MockTurtle : public Turtle {
 public:
 
-    MOCK_METHOD(void, PenUp,())
+    MOCK_METHOD(void, PenUp, ());
     MOCK_METHOD0(PenDown, void());
     MOCK_METHOD1(Forward, void(int distance));
     MOCK_METHOD1(Turn, void(int degrees));
