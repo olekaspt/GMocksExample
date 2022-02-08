@@ -5,20 +5,35 @@
 #include "Game.h"
 #include "MockRealObject.h"
 using ::testing::InSequence;
+using ::testing::Return;
+using ::testing::AtLeast;
+using ::testing::_;
+using ::testing::Ge;
+using ::testing::StrictMock;
+using ::testing::NiceMock;
 
 class MockTest {
 public:
     MOCK_METHOD(void, SomeMethod, ());
 };
 
-TEST(TestCaseName, TestName) {
+/// <summary>
+/// This meant to that the mock can be set up to call a 
+/// non-existant method.  I Have no superclass on the 
+/// MockTest and defined a method SomeMethod
+/// </summary>
+TEST(SomeTestCaseName, SomeTestName) {
     MockTest mock;
     EXPECT_CALL(mock, SomeMethod);
     mock.SomeMethod();
 
 }
 
-using ::testing::AtLeast;
+/// <summary>
+/// This is a decent Mock test in that mock object
+/// is passed to the collaborator and then we test the 
+/// Painter.DrawCircle method
+/// </summary>
 TEST(PainterTest, CanDrawSomething) {
     MockTurtle turtle;
     EXPECT_CALL(turtle, PenDown())
@@ -28,8 +43,15 @@ TEST(PainterTest, CanDrawSomething) {
 
     EXPECT_TRUE(painter.DrawCircle(0, 0, 10));
 }
-using ::testing::Return;
-TEST(PainterTest, Returns) {
+
+/// <summary>
+/// This is a bad Mock test :)
+/// But is meant to be show that the mock behave the
+/// way we expect this.  (this is a decent UnitTest
+/// for GMOCK).  Don't use this test as an pattern
+/// to follow.
+/// </summary>
+TEST(PainterTest, TestOfExpectations) {
     MockTurtle turtle;
     EXPECT_CALL(turtle, GetX())
         .Times(8)
@@ -50,7 +72,12 @@ TEST(PainterTest, Returns) {
     EXPECT_EQ(turtle.GetX(), 200);
 }
 
-TEST(PainterTest, ReturnsMoreUseful) {
+/// <summary>
+/// This basically is the same expecations in TestOfExpectations
+/// but we actualy use it with a collaborator (hint this is decent
+/// example to consider)
+/// </summary>
+TEST(PainterTest, TestChaseTurtle) {
     MockTurtle turtle;
     EXPECT_CALL(turtle, GetX())
         .Times(8)
@@ -69,6 +96,11 @@ TEST(PainterTest, ReturnsMoreUseful) {
 
 
 }
+/// <summary>
+/// This Test shows that I can setup phases of expectations
+/// </summary>
+/// <param name=""></param>
+/// <param name=""></param>
 TEST(PainterTest, MultipleExpecations) {
     MockTurtle turtle;
     EXPECT_CALL(turtle, GetX())
@@ -98,9 +130,14 @@ TEST(PainterTest, MultipleExpecations) {
 
 }
 
-using ::testing::_;
-using ::testing::Ge;
-TEST(PainterTest, ReturnsEvenMoreUseful) {
+/// <summary>
+/// This is similiar to TestChaseTurtle
+/// in that we setup expecatations that other 
+/// calls will happen, and expecations on those
+/// inputs (i.e. value will be greater than 80)
+/// </summary>
+
+TEST(PainterTest, TestChaseTurtleWithMoreExpectations) {
     MockTurtle turtle;
     EXPECT_CALL(turtle, GetX())
         .Times(8)
@@ -123,8 +160,10 @@ TEST(PainterTest, ReturnsEvenMoreUseful) {
 
 }
 
-using ::testing::StrictMock;
-using ::testing::NiceMock;
+/// <summary>
+/// Using a NiceMock, we will be allowed to 
+/// call ExpensiveOperation method.
+/// </summary>
 TEST(PainterTest, ExpensiveOperationAllowed) {
     NiceMock<MockTurtle> turtle;
     EXPECT_CALL(turtle, GetX())
@@ -147,6 +186,12 @@ TEST(PainterTest, ExpensiveOperationAllowed) {
 
 
 }
+
+/// <summary>
+/// using a StrictMock, any thing that is called
+/// that doesn't have a expecation setup will be 
+/// considered an error
+/// </summary>
 
 TEST(PainterTest, ExpensiveNotOperationAllowed) {
     StrictMock<MockTurtle> turtle;
@@ -174,6 +219,11 @@ TEST(PainterTest, ExpensiveNotOperationAllowed) {
 
 }
 
+/// <summary>
+/// The I want my cake and eat it version.  I want to 
+/// be able to call whatever I want, but by setting the
+/// expecation to be zero, I will error if ExpensiveOperation is called.
+/// </summary>
 TEST(PainterTest, ExpensiveNotOperationAllowed2) {
     MockTurtle turtle;
     EXPECT_CALL(turtle, GetX())
@@ -202,7 +252,11 @@ TEST(PainterTest, ExpensiveNotOperationAllowed2) {
 
 }
 
-TEST(MockRealObject, MockCallsMock) {
+/// <summary>
+/// This is a bad example of a Mock test.
+/// What this shows is show the difference between ON_CALL and EXPECT_CALL
+/// </summary>
+TEST(MockRealObject, MockCallsMockExpectCall) {
     MockRealObject2 mockObject;
     EXPECT_CALL(mockObject, DoWork(_))
         .Times(2)
@@ -213,10 +267,13 @@ TEST(MockRealObject, MockCallsMock) {
     EXPECT_EQ(mockObject.DoWork(2), 16);
     EXPECT_EQ(mockObject.DoWork(4), 32);
 
-
 }
 
-TEST(MockRealObject, MockCallsMock2) {
+/// <summary>
+/// This is a bad example of a Mock test.
+/// What this shows is show the difference between ON_CALL and EXPECT_CALL
+/// </summary>
+TEST(MockRealObject, MockCallsMockOnCall) {
     MockRealObject2 mockObject;
     ON_CALL(mockObject, DoWork(_))
         .WillByDefault(Return(16));
@@ -225,10 +282,12 @@ TEST(MockRealObject, MockCallsMock2) {
     EXPECT_EQ(mockObject.DoWork(2), 16);
     EXPECT_EQ(mockObject.DoWork(4), 16);
 
-
 }
-
-TEST(MockRealObject, MockCallsReal) {
+/// <summary>
+/// This is a bad example of a Mock test.
+/// What this shows is using a delegate to call into the real method
+/// </summary>
+TEST(MockRealObject, MockCallsRealThroughDelegate) {
     MockRealObject mockObject;
     EXPECT_CALL(mockObject, DoWork(_))
         .Times(2);
@@ -237,31 +296,12 @@ TEST(MockRealObject, MockCallsReal) {
     EXPECT_EQ(mockObject.DoWork(2), 4);
     EXPECT_EQ(mockObject.DoWork(4), 8);
 
-
 }
 
-
-
-TEST(MockTurtle, Sequences) {
-    MockTurtle turtle;
-
-    {
-        InSequence s;
-        
-        EXPECT_CALL(turtle, GetX());
-        EXPECT_CALL(turtle, GetY());
-        EXPECT_CALL(turtle, GoTo(5, 13));
-        EXPECT_CALL(turtle, PenDown());
-    }
-    Game game(&turtle);
-
-    game.DoStuff();
-
-
-
-}
-
-TEST(MockTurtle, UnSequences) {
+/// <summary>
+/// Test where only expectations exist
+/// </summary>
+TEST(MockTurtle, NoSequencesRestriction) {
     MockTurtle turtle;
 
     EXPECT_CALL(turtle, PenDown());
@@ -274,6 +314,26 @@ TEST(MockTurtle, UnSequences) {
 
     game.DoStuff();
 
+}
 
+/// <summary>
+/// Basically test NoSequencesRestriction
+/// except we care in the order the calls happen
+/// </summary>
+
+TEST(MockTurtle, SequencesRestriction) {
+    MockTurtle turtle;
+
+    {
+        InSequence s;
+
+        EXPECT_CALL(turtle, GetX());
+        EXPECT_CALL(turtle, GetY());
+        EXPECT_CALL(turtle, GoTo(5, 13));
+        EXPECT_CALL(turtle, PenDown());
+    }
+    Game game(&turtle);
+
+    game.DoStuff();
 
 }
