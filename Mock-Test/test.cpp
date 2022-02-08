@@ -4,7 +4,7 @@
 #include "painter.h"
 #include "Game.h"
 #include "MockRealObject.h"
-
+using ::testing::InSequence;
 
 class MockTest {
 public:
@@ -62,6 +62,35 @@ TEST(PainterTest, ReturnsMoreUseful) {
     Game game(&turtle);
 
     game.ChaseTurtle();
+
+
+    EXPECT_EQ(game.GetDogX(), 200);
+    EXPECT_EQ(game.GetMoves(), 8);
+
+
+}
+TEST(PainterTest, MultipleExpecations) {
+    MockTurtle turtle;
+    EXPECT_CALL(turtle, GetX())
+        .Times(8)
+        .WillOnce(Return(100))
+        .WillOnce(Return(150))
+        .WillRepeatedly(Return(200));
+
+
+    Game game(&turtle);
+
+    game.ChaseTurtle();
+
+    {
+        InSequence s;
+
+        EXPECT_CALL(turtle, GetX());
+        EXPECT_CALL(turtle, GetY());
+        EXPECT_CALL(turtle, GoTo(5, 13));
+        EXPECT_CALL(turtle, PenDown());
+    }
+    game.DoStuff();
 
     EXPECT_EQ(game.GetDogX(), 200);
     EXPECT_EQ(game.GetMoves(), 8);
@@ -204,14 +233,14 @@ TEST(MockRealObject, MockCallsReal) {
     EXPECT_CALL(mockObject, DoWork(_))
         .Times(2);
 
-
+    // This is calling the real method
     EXPECT_EQ(mockObject.DoWork(2), 4);
     EXPECT_EQ(mockObject.DoWork(4), 8);
 
 
 }
 
-using ::testing::InSequence;
+
 
 TEST(MockTurtle, Sequences) {
     MockTurtle turtle;
