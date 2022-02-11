@@ -4,6 +4,10 @@
 #include "painter.h"
 #include "Game.h"
 #include "MockRealObject.h"
+#include "Cat.h"
+#include "MockCat.h"
+#include "CatGame.h"
+
 using ::testing::InSequence;
 using ::testing::Return;
 using ::testing::AtLeast;
@@ -337,3 +341,41 @@ TEST(MockTurtle, SequencesRestriction) {
     game.DoStuff();
 
 }
+
+
+/// <summary>
+/// This testcase fails because IncreaseHappinessByAlot is non virtual and 
+/// doesn't get overriden, so the Mock doesn't actually call the mocked verison of
+/// SettingUpExpectationForNonVirtualMethod
+/// </summary>
+TEST(CatGame, SettingUpExpectationForNonVirtualMethod) {
+    MockCat kitty;
+
+    EXPECT_CALL(kitty,  IncreaseHappinessByAlot(_)).Times(1);
+    EXPECT_CALL(kitty, GetHappiness()).Times(1).WillOnce(Return(50));
+
+    CatGame p(&kitty);
+
+    EXPECT_FALSE(p.IsHappy());
+    p.Cuddle();
+    // one cuddle will make a happy cat
+    EXPECT_TRUE(p.IsHappy());
+}
+
+/// <summary>
+/// This TestCase passes because it is using the virtual method (to contrast the example above)
+/// </summary>
+TEST(CatGame, SettingUpExpectationForVirtualMethod ) {
+    MockCat kitty;
+    EXPECT_CALL(kitty, IncreaseHappiness(_)).Times(1);
+    EXPECT_CALL(kitty, GetHappiness()).Times(1).WillOnce(Return(10));
+
+    CatGame p(&kitty);
+
+    // only one pet does not make a happy cat
+    EXPECT_FALSE(p.IsHappy());
+    p.Pet();
+    EXPECT_FALSE(p.IsHappy());
+}
+
+
